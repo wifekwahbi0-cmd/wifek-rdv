@@ -7,54 +7,197 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        
         * { font-family: 'Cairo', sans-serif; }
-        
         .notification-slide { animation: slideDown 0.5s ease-out; }
         @keyframes slideDown { from { transform: translateY(-100%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-        
         .fade-in { animation: fadeIn 0.3s ease-in; }
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        
         .card-hover { transition: all 0.3s ease; }
         .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
-    <h1 class="text-center text-3xl font-bold text-gray-800 p-6">✅ نسخة محسنة جاهزة للرفع على GitHub Pages</h1>
-    <p class="text-center text-gray-600">ملف تجريبي - يمكنك التوسع بإضافة باقي الأقسام كما في الكود السابق</p>
+
+    <!-- إشعار -->
+    <div id="notificationBar" class="fixed top-0 left-0 right-0 bg-green-600 text-white p-3 text-center z-50 notification-slide hidden">
+        <span id="notificationText"></span>
+        <button onclick="hideNotification()" class="mr-4 bg-green-700 px-2 py-1 rounded text-sm hover:bg-green-800">إغلاق</button>
+    </div>
+
+    <!-- تسجيل الدخول -->
+    <div id="loginScreen" class="min-h-screen flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl p-8 w-full max-w-md">
+            <div class="text-center mb-8">
+                <div class="bg-blue-600 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-4">
+                    <span class="text-white text-3xl">🗣️</span>
+                </div>
+                <h1 class="text-2xl font-bold text-gray-800 mb-2">عيادة تقويم النطق</h1>
+                <p class="text-gray-600">أ. وفاق وهبي - أخصائية تقويم النطق</p>
+            </div>
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-gray-700 font-semibold mb-2">كود الدخول</label>
+                    <input type="password" id="loginCode" class="w-full p-3 border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:outline-none text-center text-lg" placeholder="أدخل كود الدخول" maxlength="4">
+                </div>
+                <button onclick="login()" class="w-full bg-blue-600 text-white py-3 rounded-lg font-semibold hover:bg-blue-700 transition duration-300">دخول</button>
+                <div id="loginError" class="text-red-500 text-center hidden">كود الدخول غير صحيح</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- لوحة التحكم -->
+    <div id="dashboard" class="hidden min-h-screen">
+        <header class="bg-white shadow-lg p-4">
+            <div class="flex justify-between items-center max-w-7xl mx-auto">
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <div class="bg-blue-600 w-12 h-12 rounded-full flex items-center justify-center">
+                        <span class="text-white text-xl">🗣️</span>
+                    </div>
+                    <div>
+                        <h1 class="text-xl font-bold text-gray-800">عيادة تقويم النطق</h1>
+                        <p class="text-gray-600">أ. وفاق وهبي</p>
+                    </div>
+                </div>
+                <div class="flex items-center space-x-4 space-x-reverse">
+                    <button onclick="saveAllData()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700 transition">💾 حفظ البيانات</button>
+                    <button onclick="logout()" class="bg-red-600 text-white px-4 py-2 rounded-lg hover:bg-red-700 transition">خروج</button>
+                </div>
+            </div>
+        </header>
+
+        <div class="flex max-w-7xl mx-auto p-4 gap-6">
+            <!-- القائمة -->
+            <div class="w-64 bg-white rounded-xl shadow-lg p-4">
+                <nav class="space-y-2">
+                    <button onclick="showSection('appointments', this)" class="nav-btn w-full text-right p-3 rounded-lg hover:bg-blue-50 transition flex items-center">📅 المواعيد والحصص</button>
+                    <button onclick="showSection('patients', this)" class="nav-btn w-full text-right p-3 rounded-lg hover:bg-blue-50 transition flex items-center">👶 ملفات الأطفال</button>
+                    <button onclick="showSection('reports', this)" class="nav-btn w-full text-right p-3 rounded-lg hover:bg-blue-50 transition flex items-center">📝 التقارير اليومية</button>
+                    <button onclick="showSection('schedule', this)" class="nav-btn w-full text-right p-3 rounded-lg hover:bg-blue-50 transition flex items-center">🕐 البرنامج اليومي</button>
+                    <button onclick="showSection('storage', this)" class="nav-btn w-full text-right p-3 rounded-lg hover:bg-blue-50 transition flex items-center">💾 إدارة التخزين</button>
+                </nav>
+            </div>
+
+            <!-- المحتوى -->
+            <div class="flex-1">
+                <!-- المواعيد -->
+                <div id="appointments" class="section hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">📅 إدارة المواعيد</h2>
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <input id="appointmentName" type="text" placeholder="اسم الطفل" class="p-3 border rounded-lg">
+                        <input id="appointmentDate" type="date" class="p-3 border rounded-lg">
+                        <input id="appointmentTime" type="time" class="p-3 border rounded-lg">
+                        <button onclick="addAppointment()" class="bg-blue-600 text-white rounded-lg px-4 py-2">➕ إضافة موعد</button>
+                    </div>
+                    <div id="appointmentsList" class="space-y-3"></div>
+                </div>
+
+                <!-- ملفات الأطفال -->
+                <div id="patients" class="section hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">👶 ملفات الأطفال</h2>
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <input id="patientName" type="text" placeholder="اسم الطفل" class="p-3 border rounded-lg">
+                        <input id="patientAge" type="number" placeholder="العمر" class="p-3 border rounded-lg">
+                        <select id="patientProgress" class="p-3 border rounded-lg">
+                            <option value="excellent">ممتاز</option>
+                            <option value="good">جيد</option>
+                            <option value="average">متوسط</option>
+                            <option value="needs">يحتاج دعم</option>
+                        </select>
+                        <button onclick="addPatient()" class="bg-blue-600 text-white rounded-lg px-4 py-2">➕ إضافة ملف</button>
+                    </div>
+                    <div id="patientsList" class="space-y-3"></div>
+                </div>
+
+                <!-- التقارير -->
+                <div id="reports" class="section hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">📝 التقارير اليومية</h2>
+                    <div class="grid md:grid-cols-2 gap-4 mb-6">
+                        <select id="reportChild" class="p-3 border rounded-lg"></select>
+                        <textarea id="reportText" placeholder="أدخل الملاحظات..." class="p-3 border rounded-lg"></textarea>
+                        <button onclick="addReport()" class="bg-blue-600 text-white rounded-lg px-4 py-2">➕ إضافة تقرير</button>
+                    </div>
+                    <div id="reportsList" class="space-y-3"></div>
+                </div>
+
+                <!-- البرنامج اليومي -->
+                <div id="schedule" class="section hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">🕐 البرنامج اليومي</h2>
+                    <div id="todaySchedule" class="space-y-3"></div>
+                </div>
+
+                <!-- إدارة التخزين -->
+                <div id="storage" class="section hidden bg-white rounded-xl shadow-lg p-6">
+                    <h2 class="text-2xl font-bold mb-6 text-gray-800">💾 إدارة التخزين</h2>
+                    <div id="storageStats" class="mb-6 p-4 bg-gray-50 rounded-lg border"></div>
+                    <div class="space-x-2 space-x-reverse">
+                        <button onclick="exportData()" class="bg-green-600 text-white px-4 py-2 rounded-lg">⬇️ تصدير البيانات</button>
+                        <button onclick="importData()" class="bg-blue-600 text-white px-4 py-2 rounded-lg">⬆️ استيراد البيانات</button>
+                        <button onclick="clearData()" class="bg-red-600 text-white px-4 py-2 rounded-lg">🗑️ مسح البيانات</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <script>
-        function showSection(sectionName, btn) {
-            document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-100','text-blue-700'));
-            document.getElementById(sectionName)?.classList.remove('hidden');
-            document.getElementById(sectionName)?.classList.add('fade-in');
+        let appointments = JSON.parse(localStorage.getItem('appointments')||'[]');
+        let patients = JSON.parse(localStorage.getItem('patients')||'[]');
+        let reports = JSON.parse(localStorage.getItem('reports')||'[]');
+
+        function login(){ 
+            if(document.getElementById('loginCode').value==="1234"){
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('dashboard').classList.remove('hidden');
+                updateAll();
+            } else {
+                document.getElementById('loginError').classList.remove('hidden');
+            }
+        }
+        function logout(){ location.reload(); }
+        function showSection(id,btn){
+            document.querySelectorAll('.section').forEach(s=>s.classList.add('hidden'));
+            document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('bg-blue-100','text-blue-700'));
+            document.getElementById(id).classList.remove('hidden');
             btn.classList.add('bg-blue-100','text-blue-700');
         }
-
-        function importData() {
-            const input = document.createElement('input');
-            input.type = 'file';
-            input.accept = '.json';
-            input.onchange = e => {
-                const file = e.target.files[0];
-                const reader = new FileReader();
-                reader.onload = event => {
-                    try {
-                        const data = JSON.parse(event.target.result);
-                        localStorage.setItem('appointments', JSON.stringify(data.appointments || []));
-                        localStorage.setItem('patients', JSON.stringify(data.patients || []));
-                        localStorage.setItem('reports', JSON.stringify(data.reports || []));
-                        alert('تم استيراد البيانات بنجاح');
-                    } catch {
-                        alert('ملف غير صالح');
-                    }
-                };
-                reader.readAsText(file);
-            };
-            input.click();
+        function updateAppointmentsList(){
+            let c=document.getElementById('appointmentsList');
+            c.innerHTML=appointments.map((a,i)=>`<div class="p-3 border rounded-lg flex justify-between"><span>${a.name} - ${a.date} ${a.time}</span><button onclick="deleteAppointment(${i})" class="text-red-600">🗑️</button></div>`).join("");
         }
+        function addAppointment(){
+            appointments.push({name:appointmentName.value,date:appointmentDate.value,time:appointmentTime.value});
+            localStorage.setItem('appointments',JSON.stringify(appointments));
+            updateAppointmentsList();
+        }
+        function deleteAppointment(i){ appointments.splice(i,1); localStorage.setItem('appointments',JSON.stringify(appointments)); updateAppointmentsList(); }
+        function updatePatientsList(){
+            let c=document.getElementById('patientsList');
+            c.innerHTML=patients.map((p,i)=>`<div class="p-3 border rounded-lg flex justify-between"><span>${p.name}, ${p.age} سنة (${p.progress})</span><button onclick="deletePatient(${i})" class="text-red-600">🗑️</button></div>`).join("");
+            loadPatientOptions();
+        }
+        function addPatient(){ patients.push({name:patientName.value,age:patientAge.value,progress:patientProgress.value}); localStorage.setItem('patients',JSON.stringify(patients)); updatePatientsList(); }
+        function deletePatient(i){ patients.splice(i,1); localStorage.setItem('patients',JSON.stringify(patients)); updatePatientsList(); }
+        function updateReportsList(){
+            let c=document.getElementById('reportsList');
+            c.innerHTML=reports.map((r,i)=>`<div class="p-3 border rounded-lg flex justify-between"><span><b>${r.child}:</b> ${r.text}</span><button onclick="deleteReport(${i})" class="text-red-600">🗑️</button></div>`).join("");
+        }
+        function addReport(){ reports.push({child:reportChild.value,text:reportText.value}); localStorage.setItem('reports',JSON.stringify(reports)); updateReportsList(); }
+        function deleteReport(i){ reports.splice(i,1); localStorage.setItem('reports',JSON.stringify(reports)); updateReportsList(); }
+        function updateTodaySchedule(){
+            let today=new Date().toISOString().split('T')[0];
+            let c=document.getElementById('todaySchedule');
+            c.innerHTML=appointments.filter(a=>a.date===today).map(a=>`<div class="p-3 border rounded-lg">${a.name} - ${a.time}</div>`).join("")||"لا يوجد مواعيد اليوم";
+        }
+        function updateStorageStats(){
+            let total=JSON.stringify({appointments,patients,reports}).length;
+            document.getElementById('storageStats').innerText="الحجم الحالي: "+total+" بايت";
+        }
+        function saveAllData(){ localStorage.setItem('appointments',JSON.stringify(appointments)); localStorage.setItem('patients',JSON.stringify(patients)); localStorage.setItem('reports',JSON.stringify(reports)); alert("تم الحفظ"); }
+        function exportData(){ const data={appointments,patients,reports}; const blob=new Blob([JSON.stringify(data)],{type:'application/json'}); const url=URL.createObjectURL(blob); const a=document.createElement('a'); a.href=url; a.download='clinic_data.json'; a.click(); URL.revokeObjectURL(url); }
+        function importData(){ const input=document.createElement('input'); input.type='file'; input.accept='.json'; input.onchange=e=>{const file=e.target.files[0]; const reader=new FileReader(); reader.onload=ev=>{try{const data=JSON.parse(ev.target.result);appointments=data.appointments||[];patients=data.patients||[];reports=data.reports||[];localStorage.setItem('appointments',JSON.stringify(appointments));localStorage.setItem('patients',JSON.stringify(patients));localStorage.setItem('reports',JSON.stringify(reports));updateAll(); alert('تم الاستيراد بنجاح');}catch{alert('ملف غير صالح');}}; reader.readAsText(file);}; input.click(); }
+        function clearData(){ localStorage.clear(); appointments=[]; patients=[]; reports=[]; updateAll(); alert("تم مسح البيانات"); }
+        function loadPatientOptions(){ document.getElementById('reportChild').innerHTML=patients.map(p=>`<option>${p.name}</option>`).join(""); }
+        function updateAll(){ updateAppointmentsList(); updatePatientsList(); updateReportsList(); updateTodaySchedule(); updateStorageStats(); loadPatientOptions(); }
     </script>
 </body>
 </html>

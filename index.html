@@ -1,108 +1,48 @@
-<!DOCTYPE html>
+    <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>لوحة عيادة وفاق وهبي</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700&display=swap');
-        * { font-family: 'Cairo', sans-serif; }
-        .fade-in { animation: fadeIn 0.3s ease-in; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        .card-hover { transition: all 0.3s ease; }
-        .card-hover:hover { transform: translateY(-2px); box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>لوحة عيادة وفاق وهبي</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="css/style.css">
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
 
-    <!-- شاشة الدخول -->
-    <div id="loginScreen" class="flex items-center justify-center min-h-screen">
-        <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-lg">
-            <h2 class="text-xl font-bold text-center mb-4">تسجيل الدخول</h2>
-            <input id="loginCode" type="password" placeholder="أدخل الكود" 
-                class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
-            <button onclick="login()" 
-                class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
-                دخول
-            </button>
-            <p id="loginError" class="text-red-500 text-sm mt-3 hidden text-center">❌ كود خاطئ</p>
-        </div>
+  <!-- شاشة الدخول -->
+  <div id="loginScreen" class="flex items-center justify-center min-h-screen">
+    <div class="w-full max-w-sm bg-white p-6 rounded-2xl shadow-lg">
+      <img src="assets/logo.png" class="w-16 mx-auto mb-3" alt="شعار العيادة">
+      <h2 class="text-xl font-bold text-center mb-4">تسجيل الدخول</h2>
+      <input id="loginCode" type="password" placeholder="أدخل الكود" 
+             class="w-full p-3 border rounded-lg mb-3 focus:outline-none focus:ring-2 focus:ring-blue-400">
+      <button onclick="login()" 
+              class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition">
+        دخول
+      </button>
+      <p id="loginError" class="text-red-500 text-sm mt-3 hidden text-center">❌ كود خاطئ</p>
     </div>
+  </div>
 
-    <!-- لوحة التحكم -->
-    <div id="dashboard" class="hidden fade-in">
-        <nav class="bg-white shadow p-4 flex justify-around">
-            <button class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-100" onclick="showSection('appointments', this)">📅 المواعيد</button>
-            <button class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-100" onclick="showSection('patients', this)">👨‍👩‍👧‍👦 الأطفال</button>
-            <button class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-100" onclick="showSection('reports', this)">📑 التقارير</button>
-            <button class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-100" onclick="showSection('schedule', this)">📌 البرنامج اليومي</button>
-            <button class="nav-btn px-4 py-2 rounded-lg hover:bg-blue-100" onclick="showSection('storage', this)">💾 التخزين</button>
-        </nav>
+  <!-- لوحة التحكم -->
+  <div id="dashboard" class="hidden fade-in">
+    <nav class="bg-white shadow p-4 flex justify-around">
+      <button class="nav-btn" onclick="showSection('appointments', this)">📅 المواعيد</button>
+      <button class="nav-btn" onclick="showSection('patients', this)">👨‍👩‍👧‍👦 الأطفال</button>
+      <button class="nav-btn" onclick="showSection('reports', this)">📑 التقارير</button>
+      <button class="nav-btn" onclick="showSection('schedule', this)">📌 البرنامج اليومي</button>
+      <button class="nav-btn" onclick="showSection('storage', this)">💾 التخزين</button>
+    </nav>
 
-        <div class="p-6 space-y-6">
-            <!-- قسم المواعيد -->
-            <div id="appointments" class="section">
-                <h2 class="text-2xl font-bold mb-4">📅 إدارة المواعيد</h2>
-                <p class="text-gray-600">إضافة وإدارة المواعيد.</p>
-            </div>
-
-            <!-- قسم الأطفال -->
-            <div id="patients" class="section hidden">
-                <h2 class="text-2xl font-bold mb-4">👨‍👩‍👧‍👦 ملفات الأطفال</h2>
-                <p class="text-gray-600">إدارة ملفات الأطفال وتفاصيلهم.</p>
-            </div>
-
-            <!-- قسم التقارير -->
-            <div id="reports" class="section hidden">
-                <h2 class="text-2xl font-bold mb-4">📑 التقارير</h2>
-                <p class="text-gray-600">رفع وعرض التقارير.</p>
-            </div>
-
-            <!-- البرنامج اليومي -->
-            <div id="schedule" class="section hidden">
-                <h2 class="text-2xl font-bold mb-4">📌 البرنامج اليومي</h2>
-                <p class="text-gray-600">عرض برنامج اليوم.</p>
-            </div>
-
-            <!-- التخزين -->
-            <div id="storage" class="section hidden">
-                <h2 class="text-2xl font-bold mb-4">💾 إدارة التخزين</h2>
-                <p class="text-gray-600">إحصائيات التخزين.</p>
-            </div>
-        </div>
+    <div class="p-6 space-y-6">
+      <div id="appointments" class="section">📅 إدارة المواعيد</div>
+      <div id="patients" class="section hidden">👨‍👩‍👧‍👦 ملفات الأطفال</div>
+      <div id="reports" class="section hidden">📑 التقارير</div>
+      <div id="schedule" class="section hidden">📌 البرنامج اليومي</div>
+      <div id="storage" class="section hidden">💾 إدارة التخزين</div>
     </div>
+  </div>
 
-    <script>
-        function login() {
-            const code = document.getElementById('loginCode').value.trim();
-            if (code === '1110') {
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('dashboard').classList.remove('hidden');
-                showSection('appointments', document.querySelector('.nav-btn'));
-            } else {
-                document.getElementById('loginError').classList.remove('hidden');
-                setTimeout(() => {
-                    document.getElementById('loginError').classList.add('hidden');
-                }, 3000);
-            }
-        }
-
-        // دعم الضغط على Enter
-        document.getElementById('loginCode').addEventListener('keydown', function(e) {
-            if (e.key === 'Enter') {
-                login();
-            }
-        });
-
-        // إظهار قسم معين
-        function showSection(sectionName, btn) {
-            document.querySelectorAll('.section').forEach(section => section.classList.add('hidden'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('bg-blue-100','text-blue-700'));
-            document.getElementById(sectionName)?.classList.remove('hidden');
-            document.getElementById(sectionName)?.classList.add('fade-in');
-            btn.classList.add('bg-blue-100','text-blue-700');
-        }
-    </script>
+  <script src="js/app.js"></script>
 </body>
 </html>
